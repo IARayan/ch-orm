@@ -1,0 +1,29 @@
+import { Migration, Blueprint } from 'ch-orm';
+
+export default class {name} extends Migration {
+  /**
+   * Run the migration
+   * Forward migration logic
+   */
+  public async up(): Promise<void> {
+    await this.schema.drop('{tableName}');
+  }
+
+  /**
+   * Reverse the migration
+   * Rollback migration logic
+   */
+  public async down(): Promise<void> {
+    await this.schema.create('{tableName}', (table: Blueprint) => {
+      // Recreate the table structure here using fluent interface
+      table.uuid('id').default('generateUUIDv4()').comment('Primary key');
+      table.dateTime('created_at').default('now()').comment('Creation timestamp');
+      
+      // Set the engine
+      table.mergeTree();
+      
+      // Set primary key
+      table.orderBy('id');
+    });
+  }
+} 

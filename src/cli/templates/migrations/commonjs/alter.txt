@@ -1,0 +1,39 @@
+const { Migration, Blueprint } = require('ch-orm');
+
+class {name} extends Migration {
+  /**
+   * Run the migration
+   * Forward migration logic
+   */
+  async up() {
+    await this.schema.alter('{tableName}', (table) => {
+      // Add new columns with fluent interface
+      table.string('email').nullable().comment('User email address');
+
+      // Modify existing columns with fluent interface
+      table.string('name').comment('Updated column with new definition');
+
+      // Drop columns
+      table.dropColumn('old_column');
+    });
+  }
+
+  /**
+   * Reverse the migration
+   * Rollback migration logic
+   */
+  async down() {
+    await this.schema.alter('{tableName}', (table) => {
+      // Reverse your column modifications here
+      table.dropColumn('email');
+      
+      // Restore original column definition
+      table.string('name').comment('Original column definition');
+      
+      // Restore dropped columns
+      table.string('old_column').nullable().comment('Restored column');
+    });
+  }
+}
+
+module.exports = {name}; 

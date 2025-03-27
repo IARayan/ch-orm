@@ -1,0 +1,32 @@
+const { Migration, Blueprint } = require('ch-orm');
+
+class {name} extends Migration {
+  /**
+   * Run the migration
+   * Forward migration logic
+   */
+  async up() {
+    await this.schema.create('{tableName}', (table) => {
+      // Define your table schema here using the fluent interface
+      table.uuid('id').default('generateUUIDv4()').comment('Primary key');
+      table.dateTime('created_at').default('now()').comment('Creation timestamp');
+      table.dateTime('updated_at').nullable().default('now()').comment('Last update timestamp');
+
+      // Set the engine
+      table.mergeTree();
+
+      // Set primary key
+      table.orderBy('id');
+    });
+  }
+
+  /**
+   * Reverse the migration
+   * Rollback migration logic
+   */
+  async down() {
+    await this.schema.drop('{tableName}');
+  }
+}
+
+module.exports = {name}; 
