@@ -1,32 +1,41 @@
-name: Publish to npm
+name: Release & Publish
 
 on:
   push:
     branches:
       - main
-  release:
-    types: [published]
+
+permissions:
+  contents: write
 
 jobs:
-  publish:
+  release:
+    name: Release & Publish Package
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org/
+          node-version: 18
+          registry-url: "https://registry.npmjs.org/"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Dependencies
+        run: npm install
 
-      - name: Build package (if needed)
-        run: npm run build # Remove if unnecessary
+      - name: Build Package
+        run: npm run build
 
-      - name: Publish to npm
-        run: npx semantic-release --access public
+      - name: Run Tests
+        run: npm test
+
+      - name: Release with Semantic Release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
