@@ -9,7 +9,7 @@
   <a href="https://www.npmjs.com/package/ch-orm"><img src="https://img.shields.io/npm/v/ch-orm.svg" alt="NPM Version" /></a>
   <a href="https://www.npmjs.com/package/ch-orm"><img src="https://img.shields.io/npm/dm/ch-orm.svg" alt="NPM Downloads" /></a>
   <a href="https://github.com/iarayan/ch-orm/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/ch-orm.svg" alt="License" /></a>
-  <a href="https://github.com/iarayan/ch-orm/actions"><img src="https://github.com/iarayan/ch-orm/actions/workflows/main.yml/badge.svg" alt="CI Status" /></a>
+  <a href="https://github.com/iarayan/ch-orm/actions"><img src="https://github.com/iarayan/ch-orm/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
 </p>
 
 <p align="center">
