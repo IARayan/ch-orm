@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/iarayan/ch-orm/compare/v1.3.2...v1.3.3) (2025-03-27)
+
+
+### Bug Fixes
+
+* release import migration fix ([72883fa](https://github.com/iarayan/ch-orm/commit/72883fa34fda51e1b4b56599c22d6d0139646ba2))
+
 ## [1.3.2](https://github.com/iarayan/ch-orm/compare/v1.3.1...v1.3.2) (2025-03-27)
 
 

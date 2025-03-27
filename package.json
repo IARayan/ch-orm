@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "A Developer-First ClickHouse ORM with Powerful CLI Tools",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
