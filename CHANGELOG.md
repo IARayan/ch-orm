@@ -1,3 +1,12 @@
+# [1.3.0](https://github.com/iarayan/ch-orm/compare/v1.2.0...v1.3.0) (2025-03-27)
+
+
+### Features
+
+* package release ([aa1c015](https://github.com/iarayan/ch-orm/commit/aa1c015b6b368f551f96a780c45fc86d52dbc44d))
+* package release ([4dea8d9](https://github.com/iarayan/ch-orm/commit/4dea8d9d0a89449a78cb9c10d49d5df8f8a21309))
+* package release ([bde4e61](https://github.com/iarayan/ch-orm/commit/bde4e61aeeca819b340f1ff8b83fa78eb5012047))
+
 # [1.2.0](https://github.com/iarayan/ch-orm/compare/v1.1.0...v1.2.0) (2025-03-27)
 
 
