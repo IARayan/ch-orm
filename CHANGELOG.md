@@ -1,3 +1,10 @@
+# 1.0.0 (2025-03-27)
+
+
+### Features
+
+* initial release ([84f6b97](https://github.com/iarayan/ch-orm/commit/84f6b9768be61951d6d20ad0d1bf30632a5433cf))
+
 # Changelog
 
 All notable changes to CH-ORM will be documented in this file.
