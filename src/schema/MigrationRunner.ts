@@ -1,4 +1,4 @@
-import { ClickHouseConnection } from "../connection/ClickHouseConnection";
+import { Connection } from "../connection/Connection";
 import { Migration } from "./Migration";
 import { Schema } from "./Schema";
 import { MigrationRecord } from "./models/MigrationRecord";
@@ -11,7 +11,7 @@ export class MigrationRunner {
   /**
    * Connection to the database
    */
-  private connection: ClickHouseConnection;
+  private connection: Connection;
 
   /**
    * Schema instance for database operations
@@ -32,7 +32,7 @@ export class MigrationRunner {
    * Create a new MigrationRunner instance
    * @param connection - ClickHouse connection
    */
-  constructor(connection: ClickHouseConnection) {
+  constructor(connection: Connection) {
     this.connection = connection;
     this.schema = new Schema(connection);
     // Set the connection for the model
@@ -85,23 +85,16 @@ export class MigrationRunner {
    */
   private async ensureMigrationsTable(): Promise<void> {
     try {
-      // Try to query the migrations table to check if it exists
-      await MigrationRecord.query().limit(1).get();
+      // First check if the table exists using the Schema class
+      const tableExists = await this.schema.hasTable(this.migrationsTable);
+
+      if (!tableExists) {
+        // If it doesn't exist, create it
+        await this.createMigrationsTable();
+      }
     } catch (error) {
-      // If the table doesn't exist, create it
-      await this.schema.create(this.migrationsTable, (table) => {
-        // Define columns matching the MigrationRecord model
-        table.string("name");
-        table.uint32("batch");
-        table.float64("execution_time", { nullable: true });
-        table.dateTime("created_at");
-
-        // Set the engine to ReplacingMergeTree
-        table.replacingMergeTree();
-
-        // In ClickHouse, the ORDER BY key is effectively the primary key
-        table.orderBy("name");
-      });
+      // If there's an error, try to create the table
+      await this.createMigrationsTable();
     }
   }
 
@@ -117,7 +110,7 @@ export class MigrationRunner {
       .orderBy("created_at", "ASC")
       .get();
 
-    return records as MigrationRecord[];
+    return records ? (records as MigrationRecord[]) : [];
   }
 
   /**
@@ -127,6 +120,9 @@ export class MigrationRunner {
   private async getLastBatchNumber(): Promise<number> {
     // Use the MigrationRecord model to get the max batch number
     const result = await MigrationRecord.query().max("batch");
+    if (!result || !result.length) {
+      return 0;
+    }
     const maxBatch = result[0]?.["max(batch)"];
     return maxBatch || 0;
   }
@@ -264,12 +260,12 @@ export class MigrationRunner {
   public async reset(): Promise<number> {
     await this.ensureMigrationsTable();
 
-    // Get all migration records ordered by created_at in reverse order using the model
+    // Get all migration records
     const recordsToRollback = await MigrationRecord.query()
       .orderBy("created_at", "DESC")
       .get();
 
-    if (recordsToRollback.length === 0) {
+    if (!recordsToRollback || recordsToRollback.length === 0) {
       return 0;
     }
 
@@ -333,9 +329,36 @@ export class MigrationRunner {
 
   /**
    * Get the underlying connection instance
-   * @returns ClickHouseConnection instance
+   * @returns Connection instance
    */
-  public getConnection(): ClickHouseConnection {
+  public getConnection(): Connection {
     return this.connection;
+  }
+
+  /**
+   * Create the migrations table if it doesn't exist
+   * This is used to track which migrations have been applied
+   * @returns Promise that resolves when the table is created
+   */
+  private async createMigrationsTable(): Promise<void> {
+    // Check if the table exists first
+    const tableExists = await this.schema.hasTable(this.migrationsTable);
+
+    if (!tableExists) {
+      // Create the migrations table
+      await this.schema.create(this.migrationsTable, (table) => {
+        // Define columns matching the MigrationRecord model
+        table.string("name");
+        table.int32("batch");
+        table.float64("execution_time", { nullable: true });
+        table.dateTime("created_at");
+
+        // Set the engine to ReplacingMergeTree
+        table.replacingMergeTree();
+
+        // In ClickHouse, the ORDER BY key is effectively the primary key
+        table.orderBy("name");
+      });
+    }
   }
 }

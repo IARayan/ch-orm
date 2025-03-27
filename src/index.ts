@@ -4,7 +4,7 @@
  */
 
 // Connection exports
-export { ClickHouseConnection } from "./connection/ClickHouseConnection";
+export { Connection } from "./connection/Connection";
 export {
   ConnectionPool,
   ConnectionPoolOptions,

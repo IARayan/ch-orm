@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { ClickHouseConnection } from "../../connection/ClickHouseConnection";
+import { Connection } from "../../connection/Connection";
 import { MigrationRunner } from "../../schema/MigrationRunner";
 import { MigrationRecord } from "../../schema/models/MigrationRecord";
 
@@ -13,10 +13,7 @@ export class MigrationRunnerCommand {
   // Map of filename to migration instance
   private migrationInstances: Map<string, any> = new Map();
 
-  constructor(
-    connection: ClickHouseConnection,
-    migrationsDir: string = "./migrations"
-  ) {
+  constructor(connection: Connection, migrationsDir: string = "./migrations") {
     this.migrationsDir = migrationsDir;
     this.runner = new MigrationRunner(connection);
 

@@ -1,8 +1,19 @@
-import { ClickHouseConnection } from "../connection/ClickHouseConnection";
+import { Connection } from "../connection/Connection";
+import { ConnectionPool } from "../connection/ConnectionPool";
 import { ColumnMetadata, MetadataStorage } from "../decorators/ModelDecorators";
 import { QueryBuilder } from "../query/QueryBuilder";
 import { QueryOptions, QueryResult } from "../types/connection";
 import { snakeToCamel } from "../utils/helpers";
+
+/**
+ * Interface for connection providers that abstract the details of
+ * connection management away from the Model class
+ */
+interface ConnectionProvider {
+  getConnection(): Promise<Connection>;
+  releaseConnection(connection: Connection): void;
+  execute<T>(callback: (connection: Connection) => Promise<T>): Promise<T>;
+}
 
 /**
  * Base Model class with ORM functionality
@@ -10,31 +21,71 @@ import { snakeToCamel } from "../utils/helpers";
  */
 export abstract class Model {
   /**
-   * Connection to the database
-   * Set this before using models
+   * Connection provider for database access
    */
-  protected static connection: ClickHouseConnection;
+  private static connectionProvider: ConnectionProvider;
 
   /**
    * Set the database connection for all models
-   * @param connection - ClickHouse connection
+   * @param connection - ClickHouse connection or connection pool
    */
-  public static setConnection(connection: ClickHouseConnection): void {
-    Model.connection = connection;
+  public static setConnection(connection: Connection | ConnectionPool): void {
+    if (connection instanceof ConnectionPool) {
+      // If it's a pool, create a provider that uses the pool
+      this.connectionProvider = {
+        getConnection: async () => {
+          return connection.getConnection();
+        },
+        releaseConnection: (conn: Connection) => {
+          connection.releaseConnection(conn);
+        },
+        execute: async <T>(
+          callback: (connection: Connection) => Promise<T>
+        ): Promise<T> => {
+          // Use the pool's withConnection method
+          return connection.withConnection(callback);
+        },
+      };
+    } else {
+      // If it's a regular connection, create a simple provider
+      this.connectionProvider = {
+        getConnection: async () => {
+          return connection;
+        },
+        releaseConnection: () => {
+          // Do nothing, single connections don't need to be released
+        },
+        execute: async <T>(
+          callback: (connection: Connection) => Promise<T>
+        ): Promise<T> => {
+          // Simply execute with the connection
+          return callback(connection);
+        },
+      };
+    }
   }
 
   /**
    * Get the database connection
    * @returns ClickHouse connection
    */
-  protected static getConnection(): ClickHouseConnection {
-    if (!Model.connection) {
+  protected static getConnection(): Connection {
+    if (!this.connectionProvider) {
       throw new Error(
         "Database connection not set. Call Model.setConnection() first."
       );
     }
 
-    return Model.connection;
+    // For backward compatibility with existing code
+    return new Proxy({} as Connection, {
+      get: (target, prop) => {
+        return async (...args: any[]) => {
+          return this.connectionProvider.execute(async (conn) => {
+            return (conn as any)[prop](...args);
+          });
+        };
+      },
+    });
   }
 
   /**
@@ -71,13 +122,16 @@ export abstract class Model {
 
   /**
    * Create a new query builder for this model
-   * @returns QueryBuilder instance
+   * @returns Query builder instance
    */
   public static query(): QueryBuilder {
-    const connection = this.getConnection();
-    const tableName = this.getTableName();
+    if (!this.connectionProvider) {
+      throw new Error(`No connection set for model ${this.name}`);
+    }
 
-    return new QueryBuilder(connection, tableName);
+    // For a query builder, we need to use the proxied connection
+    const connection = this.getConnection();
+    return new QueryBuilder(connection, this.getTableName());
   }
 
   /**
@@ -89,8 +143,12 @@ export abstract class Model {
     options?: QueryOptions
   ): Promise<T[]> {
     const modelClass = this as unknown as typeof Model;
-    const records = await modelClass.query().get(options);
-    return modelClass.hydrate<T>(records);
+
+    return this.connectionProvider.execute(async (connection) => {
+      const qb = new QueryBuilder(connection, modelClass.getTableName());
+      const records = await qb.get(options);
+      return modelClass.hydrate<T>(records);
+    });
   }
 
   /**
@@ -113,16 +171,16 @@ export abstract class Model {
     // Use the first primary key if there are multiple
     const primaryKey = primaryKeys[0];
 
-    const record = await modelClass
-      .query()
-      .where(primaryKey, "=", id)
-      .first(options);
+    return this.connectionProvider.execute(async (connection) => {
+      const qb = new QueryBuilder(connection, modelClass.getTableName());
+      const record = await qb.where(primaryKey, "=", id).first(options);
 
-    if (!record) {
-      return null;
-    }
+      if (!record) {
+        return null;
+      }
 
-    return modelClass.hydrate<T>([record])[0];
+      return modelClass.hydrate<T>([record])[0];
+    });
   }
 
   /**
@@ -328,7 +386,10 @@ export abstract class Model {
     const constructor = this.constructor as typeof Model;
     const record = this.toRecord();
 
-    return constructor.insert(record, options);
+    return constructor.connectionProvider.execute(async (connection) => {
+      const qb = new QueryBuilder(connection, constructor.getTableName());
+      return qb.insert(record, options);
+    });
   }
 
   /**
@@ -381,21 +442,23 @@ export abstract class Model {
       );
     }
 
-    // Build query using all available primary keys
-    const query = modelClass.query();
+    return modelClass.connectionProvider.execute(async (connection) => {
+      // Build query using all available primary keys
+      const qb = new QueryBuilder(connection, modelClass.getTableName());
 
-    for (const key of primaryKeys) {
-      const value = (this as any)[key];
+      for (const key of primaryKeys) {
+        const value = (this as any)[key];
 
-      if (value === undefined) {
-        throw new Error(
-          `Cannot delete model instance: Primary key '${key}' is undefined`
-        );
+        if (value === undefined) {
+          throw new Error(
+            `Cannot delete model instance: Primary key '${key}' is undefined`
+          );
+        }
+
+        qb.where(key, "=", value);
       }
 
-      query.where(key, "=", value);
-    }
-
-    return query.delete(options);
+      return qb.delete(options);
+    });
   }
 }

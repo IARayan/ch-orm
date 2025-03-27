@@ -1,8 +1,8 @@
-import { ClickHouseConnection } from "../src/connection/ClickHouseConnection";
+import { Connection } from "../src/connection/Connection";
 import { ConnectionPool } from "../src/connection/ConnectionPool";
 
-// Mock ClickHouseConnection
-jest.mock("../src/connection/ClickHouseConnection");
+// Mock Connection
+jest.mock("../src/connection/Connection");
 
 describe("ConnectionPool", () => {
   let pool: ConnectionPool;
@@ -10,8 +10,8 @@ describe("ConnectionPool", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mock ClickHouseConnection methods
-    (ClickHouseConnection as jest.Mock).mockImplementation(() => ({
+    // Mock Connection methods
+    (Connection as jest.Mock).mockImplementation(() => ({
       query: jest.fn().mockResolvedValue([]),
       execute: jest.fn().mockResolvedValue([]),
       insert: jest.fn().mockResolvedValue([]),
@@ -63,7 +63,7 @@ describe("ConnectionPool", () => {
       const connection = await pool.getConnection();
 
       expect(connection).toBeDefined();
-      expect(ClickHouseConnection).toHaveBeenCalled();
+      expect(Connection).toHaveBeenCalled();
     });
 
     it("should reuse an existing connection from the pool", async () => {

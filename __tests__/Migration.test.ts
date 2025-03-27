@@ -1,10 +1,10 @@
-import { ClickHouseConnection } from "../src/connection/ClickHouseConnection";
+import { Connection } from "../src/connection/Connection";
 import { Migration } from "../src/schema/Migration";
 import { Schema } from "../src/schema/Schema";
 
 // Mock dependencies
 jest.mock("../src/schema/Schema");
-jest.mock("../src/connection/ClickHouseConnection");
+jest.mock("../src/connection/Connection");
 
 // Create a concrete migration class for testing
 class TestMigration extends Migration {
@@ -21,14 +21,14 @@ class TestMigration extends Migration {
 }
 
 describe("Migration", () => {
-  let connection: ClickHouseConnection;
+  let connection: Connection;
   let migration: TestMigration;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     // Setup connection mock
-    connection = new ClickHouseConnection({});
+    connection = new Connection({});
 
     // Setup Schema mock
     (Schema.prototype.create as jest.Mock).mockResolvedValue(undefined);

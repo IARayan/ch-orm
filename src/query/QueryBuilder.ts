@@ -1,4 +1,4 @@
-import { ClickHouseConnection } from "../connection/ClickHouseConnection";
+import { Connection } from "../connection/Connection";
 import { QueryOptions, QueryResult } from "../types/connection";
 import { formatValue } from "../utils/helpers";
 import { Raw } from "./Raw";
@@ -44,7 +44,7 @@ export class QueryBuilder {
   /**
    * Database connection instance
    */
-  protected connection: ClickHouseConnection;
+  protected connection: Connection;
 
   /**
    * Table name to query
@@ -126,7 +126,7 @@ export class QueryBuilder {
    * @param connection - ClickHouse connection
    * @param table - Table name (optional)
    */
-  constructor(connection: ClickHouseConnection, table?: string) {
+  constructor(connection: Connection, table?: string) {
     this.connection = connection;
 
     if (table) {
@@ -1182,7 +1182,7 @@ export class QueryBuilder {
    */
   public async first<T = any>(options?: QueryOptions): Promise<T | null> {
     const results = await this.limit(1).get<T>(options);
-    return results.length > 0 ? results[0] : null;
+    return results && results.length > 0 ? results[0] : null;
   }
 
   /**

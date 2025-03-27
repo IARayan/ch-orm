@@ -1,4 +1,4 @@
-import { ClickHouseConnection } from "../connection/ClickHouseConnection";
+import { Connection } from "../connection/Connection";
 import { Schema } from "./Schema";
 
 /**
@@ -14,7 +14,7 @@ export abstract class Migration {
   /**
    * Connection instance for direct database access
    */
-  protected connection: ClickHouseConnection;
+  protected connection: Connection;
 
   /**
    * Migration name (derived from class name)
@@ -30,7 +30,7 @@ export abstract class Migration {
    * Create a new Migration instance
    * @param connection - ClickHouse connection
    */
-  constructor(connection: ClickHouseConnection) {
+  constructor(connection: Connection) {
     this.connection = connection;
     this.schema = new Schema(connection);
     this.name = this.constructor.name;

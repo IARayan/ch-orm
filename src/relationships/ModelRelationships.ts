@@ -1,4 +1,4 @@
-import { ClickHouseConnection } from "../connection/ClickHouseConnection";
+import { Connection } from "../connection/Connection";
 import { MetadataStorage } from "../decorators/ModelDecorators";
 import { Model } from "../model/Model";
 import { QueryBuilder } from "../query/QueryBuilder";
@@ -96,7 +96,7 @@ export abstract class Relationship<T extends Model, R extends Model> {
   /**
    * Get the connection from a model instance
    */
-  protected getConnection(): ClickHouseConnection {
+  protected getConnection(): Connection {
     // Using the static getConnection method from Model
     return (this.relatedModelClass as any).getConnection();
   }

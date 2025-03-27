@@ -1,18 +1,15 @@
 import * as fs from "fs";
 import * as path from "path";
-import { ClickHouseConnection } from "../../connection/ClickHouseConnection";
+import { Connection } from "../../connection/Connection";
 
 /**
  * Command for seeding the database
  */
 export class SeederCommand {
-  private connection: ClickHouseConnection;
+  private connection: Connection;
   private seedersDir: string;
 
-  constructor(
-    connection: ClickHouseConnection,
-    seedersDir: string = "./seeders"
-  ) {
+  constructor(connection: Connection, seedersDir: string = "./seeders") {
     this.connection = connection;
     this.seedersDir = seedersDir;
   }

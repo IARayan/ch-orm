@@ -1,5 +1,5 @@
 import { ConnectionConfig } from "../types/connection";
-import { ClickHouseConnection } from "./ClickHouseConnection";
+import { Connection } from "./Connection";
 
 /**
  * Options for connection pool
@@ -75,28 +75,23 @@ export class ConnectionPool {
    * Pool of available connections
    */
   private availableConnections: Array<{
-    connection: ClickHouseConnection;
+    connection: Connection;
     lastUsed: number;
   }> = [];
 
   /**
    * Currently borrowed connections
    */
-  private borrowedConnections: Set<ClickHouseConnection> = new Set();
+  private borrowedConnections: Set<Connection> = new Set();
 
   /**
    * Queue of pending requests for connections
    */
   private waitingClients: Array<{
-    resolve: (connection: ClickHouseConnection) => void;
+    resolve: (connection: Connection) => void;
     reject: (error: Error) => void;
     timeoutId: NodeJS.Timeout;
   }> = [];
-
-  /**
-   * Interval for idle connection cleanup
-   */
-  private cleanupInterval: NodeJS.Timeout | null = null;
 
   /**
    * Create a new connection pool
@@ -116,11 +111,6 @@ export class ConnectionPool {
 
     // Initialize the pool with minimum connections
     this.initialize();
-
-    // Start the cleanup interval
-    this.cleanupInterval = setInterval(() => {
-      this.removeIdleConnections();
-    }, Math.min(30000, this.idleTimeoutMillis));
   }
 
   /**
@@ -129,7 +119,7 @@ export class ConnectionPool {
   private async initialize(): Promise<void> {
     try {
       for (let i = 0; i < this.minConnections; i++) {
-        const connection = new ClickHouseConnection(this.connectionOptions);
+        const connection = new Connection(this.connectionOptions);
         // Test the connection to ensure it's valid
         await connection.ping();
         this.availableConnections.push({
@@ -146,7 +136,7 @@ export class ConnectionPool {
    * Get a connection from the pool
    * @returns Promise that resolves to a connection
    */
-  public async getConnection(): Promise<ClickHouseConnection> {
+  public async getConnection(): Promise<Connection> {
     // If there are available connections, use one
     if (this.availableConnections.length > 0) {
       const { connection } = this.availableConnections.shift()!;
@@ -194,7 +184,7 @@ export class ConnectionPool {
    * Release a connection back to the pool
    * @param connection - Connection to release
    */
-  public releaseConnection(connection: ClickHouseConnection): void {
+  public releaseConnection(connection: Connection): void {
     // If the connection is borrowed, release it
     if (this.borrowedConnections.has(connection)) {
       this.borrowedConnections.delete(connection);
@@ -213,6 +203,9 @@ export class ConnectionPool {
         connection,
         lastUsed: Date.now(),
       });
+
+      // Check for idle connections whenever a connection is released
+      this.removeIdleConnections();
     }
   }
 
@@ -220,8 +213,8 @@ export class ConnectionPool {
    * Create a new connection
    * @returns Promise that resolves to a new connection
    */
-  private async createConnection(): Promise<ClickHouseConnection> {
-    const connection = new ClickHouseConnection(this.connectionOptions);
+  private async createConnection(): Promise<Connection> {
+    const connection = new Connection(this.connectionOptions);
 
     try {
       // Test the connection to ensure it's valid
@@ -271,8 +264,8 @@ export class ConnectionPool {
       // Close the idle connections
       for (const { connection } of idleConnections) {
         try {
-          // No explicit close method on ClickHouseConnection, but can be added
-          // connection.close();
+          // Close the connection properly
+          connection.close();
         } catch (error) {
           console.error("Error closing idle connection:", error);
         }
@@ -286,7 +279,7 @@ export class ConnectionPool {
    * @returns Promise that resolves to the function's result
    */
   public async withConnection<T>(
-    fn: (connection: ClickHouseConnection) => Promise<T>
+    fn: (connection: Connection) => Promise<T>
   ): Promise<T> {
     const connection = await this.getConnection();
 
@@ -304,12 +297,6 @@ export class ConnectionPool {
    * Close all connections in the pool
    */
   public async close(): Promise<void> {
-    // Clear the cleanup interval
-    if (this.cleanupInterval) {
-      clearInterval(this.cleanupInterval);
-      this.cleanupInterval = null;
-    }
-
     // Clear waiting clients
     for (const { reject, timeoutId } of this.waitingClients) {
       clearTimeout(timeoutId);
@@ -330,8 +317,8 @@ export class ConnectionPool {
     // Close each connection
     for (const connection of allConnections) {
       try {
-        // No explicit close method on ClickHouseConnection, but can be added
-        // await connection.close();
+        // Close the connection properly
+        await connection.close();
       } catch (error) {
         console.error("Error closing connection:", error);
       }

@@ -10,10 +10,10 @@ import {
 import { formatValue } from "../utils/helpers";
 
 /**
- * ClickHouseConnection class for managing connections to a ClickHouse server
+ * Connection class for managing connections to a ClickHouse server
  * Handles query execution and manages connection state
  */
-export class ClickHouseConnection {
+export class Connection {
   /**
    * Configuration for this connection
    */
@@ -373,8 +373,7 @@ export class ClickHouseConnection {
   }
 
   /**
-   * Close the connection
-   * This is a no-op for HTTP connections but included for API compatibility
+   * Close the connection and release resources
    */
   public async close(): Promise<void> {
     // HTTP connections are stateless, so no cleanup needed

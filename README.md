@@ -50,10 +50,10 @@ npm install -g ch-orm
 The first step is to create a connection to your ClickHouse database and set it for your models:
 
 ```typescript
-import { ClickHouseConnection, Model } from "ch-orm";
+import { Connection, Model } from "ch-orm";
 
 // Create a connection
-const connection = new ClickHouseConnection({
+const connection = new Connection({
   host: "localhost",
   port: 8123,
   database: "default",
@@ -91,15 +91,16 @@ const pool = new ConnectionPool(
   }
 );
 
-// Use the pool for a specific operation
+// Option 1: Use the pool for a specific operation
 const result = await pool.withConnection(async (connection) => {
-  // Set the connection temporarily
-  Model.setConnection(connection);
-
-  // Perform operations
-  const users = await User.all();
-  return users;
+  // Perform operations with the connection
+  const result = await connection.query("SELECT * FROM users");
+  return result;
 });
+
+// Option 2: Set the pool directly for all models
+// This will handle connection pooling automatically
+Model.setConnection(pool);
 ```
 
 ### Environment Configuration
@@ -154,9 +155,7 @@ const users = await User.query()
   .get();
 
 // Raw queries
-const result = await connection.query("SELECT * FROM users WHERE id = ?", [
-  "1234",
-]);
+const result = await connection.query("SELECT * FROM users WHERE id = 1234");
 
 // Parameterized queries
 const result = await connection.execute("SELECT * FROM users WHERE email = ?", [
@@ -325,114 +324,89 @@ export default class AddProfileFieldsToUsers extends Migration {
 }
 ```
 
-Creating tables with relationships:
+## 💡 Advanced Query Builder Features
+
+The QueryBuilder provides a fluent interface for constructing complex queries:
 
 ```typescript
-import { Migration, Blueprint } from "ch-orm";
+import { Raw } from "ch-orm";
 
-export default class CreatePostsTable extends Migration {
-  /**
-   * Run the migration
-   * Forward migration logic
-   */
-  public async up(): Promise<void> {
-    // First, ensure the users table exists
-    if (!(await this.schema.hasTable("users"))) {
-      await this.schema.create("users", (table: Blueprint) => {
-        table.uuid("id", { defaultExpression: "generateUUIDv4()" });
-        table.string("name");
-        table.string("email").unique();
-        table.dateTime("created_at", { defaultExpression: "now()" });
+// Complex where conditions
+const users = await User.query()
+  .where("status", "active")
+  .where(function (query) {
+    query.where("role", "admin").orWhere("role", "moderator");
+  })
+  .where("created_at", ">", new Date("2023-01-01"))
+  .get();
 
-        table.mergeTree();
-        table.orderBy("id");
-      });
-    }
+// Raw expressions
+const popularPosts = await Post.query()
+  .select("*", Raw.fn("COUNT", "*").as("view_count"))
+  .where("created_at", ">", Raw.fn("subtractDays", Raw.now(), 7))
+  .groupBy("id")
+  .having("view_count", ">", 1000)
+  .orderBy("view_count", "DESC")
+  .limit(10)
+  .get();
 
-    // Create posts table with relationship to users
-    await this.schema.create("posts", (table: Blueprint) => {
-      // Define columns
-      table.uuid("id", { defaultExpression: "generateUUIDv4()" });
-      table.string("title");
-      table.text("content");
-      table.uuid("user_id"); // References users.id
-      table.dateTime("created_at", { defaultExpression: "now()" });
-
-      // Add indices for better join performance
-      table.index("user_id_idx", "user_id");
-
-      // ClickHouse specific settings
-      table.mergeTree();
-      table.orderBy(["id", "user_id"]); // Include user_id in ordering
-      table.partitionBy("toYYYYMM(created_at)");
-
-      // Using dictionary for fast lookups (optional)
-      // This creates a dictionary for joining with the users table
-      table.comment("Join using: posts JOIN users ON posts.user_id = users.id");
-    });
-
-    // Create a materialized view using the Schema class methods
-    await this.schema.createMaterializedView(
-      "posts_with_users",
-      `
-        SELECT
-          p.*,
-          u.name as user_name,
-          u.email as user_email
-        FROM posts p
-        LEFT JOIN users u ON p.user_id = u.id
-      `,
-      null,
-      "MergeTree() ORDER BY (user_id, id) PARTITION BY toYYYYMM(created_at)"
-    );
-  }
-
-  /**
-   * Reverse the migration
-   * Rollback migration logic
-   */
-  public async down(): Promise<void> {
-    // Drop in reverse order
-    await this.schema.dropMaterializedView("posts_with_users");
-    await this.schema.drop("posts");
-  }
-}
+// Joins
+const userStats = await User.query()
+  .select(
+    "users.id",
+    "users.name",
+    Raw.fn("COUNT", "posts.id").as("post_count")
+  )
+  .leftJoin("posts", "users.id", "=", "posts.user_id")
+  .groupBy("users.id", "users.name")
+  .get();
 ```
 
-You can also create regular views:
+## 🧪 Writing Tests
+
+Test your CH-ORM code with mocked connections:
 
 ```typescript
-import { Migration } from "ch-orm";
+import { Connection, Model } from "ch-orm";
 
-export default class CreateUserStatsView extends Migration {
-  /**
-   * Run the migration
-   * Forward migration logic
-   */
-  public async up(): Promise<void> {
-    // Create a regular view
-    await this.schema.createView(
-      "user_post_stats",
-      `
-        SELECT
-          user_id,
-          count() as post_count,
-          min(created_at) as first_post_date,
-          max(created_at) as last_post_date
-        FROM posts
-        GROUP BY user_id
-      `
+// Mock the ClickHouse Connection
+jest.mock("ch-orm/lib/connection/Connection");
+
+describe("User", () => {
+  let connection: Connection;
+
+  beforeEach(() => {
+    // Clear all mocks
+    jest.clearAllMocks();
+
+    // Create a mock connection
+    connection = new Connection({});
+
+    // Mock the query method
+    (connection.query as jest.Mock).mockResolvedValue({
+      data: [{ id: "1234", name: "Test User", email: "test@example.com" }],
+    });
+
+    // Set the mocked connection
+    Model.setConnection(connection);
+  });
+
+  it("should fetch a user by ID", async () => {
+    // Test your model method
+    const user = await User.find("1234");
+
+    // Verify the result
+    expect(user).not.toBeNull();
+    expect(user?.name).toBe("Test User");
+    expect(user?.email).toBe("test@example.com");
+
+    // Verify that query was called with expected parameters
+    expect(connection.query).toHaveBeenCalledWith(
+      expect.stringContaining("WHERE id = ?"),
+      expect.arrayContaining(["1234"])
     );
-  }
-
-  /**
-   * Reverse the migration
-   * Rollback migration logic
-   */
-  public async down(): Promise<void> {
-    await this.schema.dropView("user_post_stats");
-  }
-}
+  });
+});
 ```
 
 ## 📖 Documentation

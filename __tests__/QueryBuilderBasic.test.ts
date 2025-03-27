@@ -1,18 +1,18 @@
-import { ClickHouseConnection } from "../src/connection/ClickHouseConnection";
+import { Connection } from "../src/connection/Connection";
 import { QueryBuilder } from "../src/query/QueryBuilder";
 
 // Mock dependencies
-jest.mock("../src/connection/ClickHouseConnection");
+jest.mock("../src/connection/Connection");
 
 describe("QueryBuilder Basic Tests", () => {
   let queryBuilder: QueryBuilder;
-  let connection: ClickHouseConnection;
+  let connection: Connection;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     // Create mock connection
-    connection = new ClickHouseConnection({});
+    connection = new Connection({});
     (connection.query as jest.Mock).mockResolvedValue({ data: [] });
 
     // Create query builder instance

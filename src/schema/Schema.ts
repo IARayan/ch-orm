@@ -1,4 +1,4 @@
-import { ClickHouseConnection } from "../connection/ClickHouseConnection";
+import { Connection } from "../connection/Connection";
 import { Blueprint } from "./Blueprint";
 
 /**
@@ -9,13 +9,13 @@ export class Schema {
   /**
    * Database connection
    */
-  private connection: ClickHouseConnection;
+  private connection: Connection;
 
   /**
    * Create a new Schema instance
    * @param connection - ClickHouse connection
    */
-  constructor(connection: ClickHouseConnection) {
+  constructor(connection: Connection) {
     this.connection = connection;
   }
 

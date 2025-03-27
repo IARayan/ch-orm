@@ -7,7 +7,7 @@ import figlet from "figlet";
 import * as fs from "fs";
 import ora from "ora";
 import * as path from "path";
-import { ClickHouseConnection } from "../connection/ClickHouseConnection";
+import { Connection } from "../connection/Connection";
 import { MigrationRecord } from "../schema/models/MigrationRecord";
 import {
   MakeMigrationCommand,
@@ -47,7 +47,7 @@ function loadConfig() {
  * Create a ClickHouse connection from configuration
  */
 function createConnection(config: any) {
-  return new ClickHouseConnection({
+  return new Connection({
     host: config.host,
     port: config.port,
     database: config.database,

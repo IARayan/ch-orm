@@ -1,18 +1,18 @@
-import { ClickHouseConnection } from "../src/connection/ClickHouseConnection";
+import { Connection } from "../src/connection/Connection";
 import { Schema } from "../src/schema/Schema";
 
 // Mock dependencies
-jest.mock("../src/connection/ClickHouseConnection");
+jest.mock("../src/connection/Connection");
 
 describe("Schema Basic Tests", () => {
   let schema: Schema;
-  let connection: ClickHouseConnection;
+  let connection: Connection;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     // Create mock connection
-    connection = new ClickHouseConnection({});
+    connection = new Connection({});
     (connection.query as jest.Mock).mockResolvedValue({ data: [] });
 
     // Create schema instance

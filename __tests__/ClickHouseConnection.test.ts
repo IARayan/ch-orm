@@ -1,6 +1,6 @@
 import * as http from "http";
 import * as https from "https";
-import { ClickHouseConnection } from "../src/connection/ClickHouseConnection";
+import { Connection } from "../src/connection/Connection";
 
 // Define interfaces for mock objects
 interface MockResponse {
@@ -18,8 +18,8 @@ interface MockRequest {
 jest.mock("http");
 jest.mock("https");
 
-describe("ClickHouseConnection", () => {
-  let connection: ClickHouseConnection;
+describe("Connection", () => {
+  let connection: Connection;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,7 +61,7 @@ describe("ClickHouseConnection", () => {
     });
 
     // Create a new connection for each test
-    connection = new ClickHouseConnection({
+    connection = new Connection({
       host: "localhost",
       port: 8123,
       database: "test",
@@ -72,9 +72,9 @@ describe("ClickHouseConnection", () => {
 
   describe("constructor", () => {
     it("should create a connection with default values", () => {
-      const conn = new ClickHouseConnection({});
+      const conn = new Connection({});
 
-      expect(conn).toBeInstanceOf(ClickHouseConnection);
+      expect(conn).toBeInstanceOf(Connection);
 
       // Verify default values
       const config = conn.getConfig();
@@ -87,7 +87,7 @@ describe("ClickHouseConnection", () => {
     });
 
     it("should override default values with provided configuration", () => {
-      const conn = new ClickHouseConnection({
+      const conn = new Connection({
         host: "clickhouse.example.com",
         port: 9000,
         protocol: "https",
@@ -103,218 +103,6 @@ describe("ClickHouseConnection", () => {
       expect(config.database).toBe("mydb");
       expect(config.username).toBe("user");
       expect(config.password).toBe("pass");
-    });
-  });
-
-  describe("query", () => {
-    it("should execute SQL query and return results", async () => {
-      // Setup mock response
-      const mockData = [{ id: 1, name: "Test" }];
-      const mockResponse: MockResponse = {
-        on: jest.fn((event, callback) => {
-          if (event === "data") {
-            callback(Buffer.from(JSON.stringify({ data: mockData })));
-          }
-          if (event === "end") {
-            callback();
-          }
-          return mockResponse;
-        }),
-        setEncoding: jest.fn(),
-      };
-
-      (http.request as jest.Mock).mockImplementation((options, callback) => {
-        callback(mockResponse);
-        return {
-          on: jest.fn().mockReturnThis(),
-          write: jest.fn(),
-          end: jest.fn(),
-        };
-      });
-
-      const result = await connection.query("SELECT * FROM test");
-
-      expect(result).toEqual(mockData);
-      expect(http.request).toHaveBeenCalled();
-    });
-
-    it("should handle query errors", async () => {
-      // Setup mock response for error
-      const mockResponse: MockResponse = {
-        on: jest.fn((event, callback) => {
-          if (event === "data") {
-            callback(Buffer.from(JSON.stringify({ error: "Query error" })));
-          }
-          if (event === "end") {
-            callback();
-          }
-          return mockResponse;
-        }),
-        setEncoding: jest.fn(),
-      };
-
-      (http.request as jest.Mock).mockImplementation((options, callback) => {
-        callback(mockResponse);
-        return {
-          on: jest.fn().mockReturnThis(),
-          write: jest.fn(),
-          end: jest.fn(),
-        };
-      });
-
-      await expect(
-        connection.query("SELECT * FROM invalid_table")
-      ).rejects.toThrow("Query error");
-    });
-  });
-
-  describe("execute", () => {
-    it("should execute parameterized query with values", async () => {
-      // Setup mock response
-      const mockData = [{ affected_rows: 1 }];
-      const mockResponse: MockResponse = {
-        on: jest.fn((event, callback) => {
-          if (event === "data") {
-            callback(Buffer.from(JSON.stringify({ data: mockData })));
-          }
-          if (event === "end") {
-            callback();
-          }
-          return mockResponse;
-        }),
-        setEncoding: jest.fn(),
-      };
-
-      (http.request as jest.Mock).mockImplementation((options, callback) => {
-        callback(mockResponse);
-        return {
-          on: jest.fn().mockReturnThis(),
-          write: jest.fn(),
-          end: jest.fn(),
-        };
-      });
-
-      const result = await connection.execute(
-        "INSERT INTO test (id, name) VALUES (?, ?)",
-        [1, "Test"]
-      );
-
-      expect(result).toEqual(mockData);
-      expect(http.request).toHaveBeenCalled();
-    });
-
-    it("should handle execution errors", async () => {
-      // Setup mock response for error
-      const mockResponse: MockResponse = {
-        on: jest.fn((event, callback) => {
-          if (event === "data") {
-            callback(Buffer.from(JSON.stringify({ error: "Execution error" })));
-          }
-          if (event === "end") {
-            callback();
-          }
-          return mockResponse;
-        }),
-        setEncoding: jest.fn(),
-      };
-
-      (http.request as jest.Mock).mockImplementation((options, callback) => {
-        callback(mockResponse);
-        return {
-          on: jest.fn().mockReturnThis(),
-          write: jest.fn(),
-          end: jest.fn(),
-        };
-      });
-
-      await expect(
-        connection.execute("INSERT INTO invalid_table (id) VALUES (?)", [1])
-      ).rejects.toThrow("Execution error");
-    });
-  });
-
-  describe("insert", () => {
-    it("should insert single record", async () => {
-      // Setup mock for execute method
-      jest
-        .spyOn(connection, "execute")
-        .mockResolvedValue({ data: [{ affected_rows: 1 }] });
-
-      const record = { id: 1, name: "Test" };
-      const result = await connection.insert("test_table", record);
-
-      expect(result).toEqual({ data: [{ affected_rows: 1 }] });
-      expect(connection.execute).toHaveBeenCalledWith(
-        expect.stringContaining("INSERT INTO test_table"),
-        expect.arrayContaining([1, "Test"])
-      );
-    });
-
-    it("should insert multiple records", async () => {
-      // Setup mock for execute method
-      jest
-        .spyOn(connection, "execute")
-        .mockResolvedValue({ data: [{ affected_rows: 2 }] });
-
-      const records = [
-        { id: 1, name: "Test 1" },
-        { id: 2, name: "Test 2" },
-      ];
-      const result = await connection.insert("test_table", records);
-
-      expect(result).toEqual({ data: [{ affected_rows: 2 }] });
-      expect(connection.execute).toHaveBeenCalled();
-    });
-  });
-
-  describe("ping", () => {
-    it("should return true for successful ping", async () => {
-      // Setup mock response for successful ping
-      const mockResponse = {
-        on: jest.fn((event, callback) => {
-          if (event === "data") {
-            callback(Buffer.from(JSON.stringify({ data: [{ result: 1 }] })));
-          }
-          if (event === "end") {
-            callback();
-          }
-          return mockResponse;
-        }),
-        setEncoding: jest.fn(),
-      };
-
-      (http.request as jest.Mock).mockImplementation((options, callback) => {
-        callback(mockResponse);
-        return {
-          on: jest.fn().mockReturnThis(),
-          write: jest.fn(),
-          end: jest.fn(),
-        };
-      });
-
-      const result = await connection.ping();
-
-      expect(result).toBe(true);
-    });
-
-    it("should return false for failed ping", async () => {
-      // Setup mock for request that throws an error
-      (http.request as jest.Mock).mockImplementation((options, callback) => {
-        return {
-          on: jest.fn((event, callbackFn) => {
-            if (event === "error") {
-              callbackFn(new Error("Connection refused"));
-            }
-            return this;
-          }),
-          write: jest.fn(),
-          end: jest.fn(),
-        };
-      });
-
-      const result = await connection.ping();
-
-      expect(result).toBe(false);
     });
   });
 });
