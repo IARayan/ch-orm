@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/iarayan/ch-orm/compare/v1.3.3...v1.3.4) (2025-03-27)
+
+
+### Bug Fixes
+
+* update README.md correctly ([ad448b6](https://github.com/iarayan/ch-orm/commit/ad448b679b33a0b6fa6698bac99dfa0c9edb6daf))
+
 ## [1.3.3](https://github.com/iarayan/ch-orm/compare/v1.3.2...v1.3.3) (2025-03-27)
 
 
