@@ -6,9 +6,9 @@
 <h3 align="center">A Developer-First ClickHouse ORM with Powerful CLI Tools</h3>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@iarayan/ch-orm"><img src="https://img.shields.io/npm/v/ch-orm.svg" alt="NPM Version" /></a>
-  <a href="https://www.npmjs.com/package/@iarayan/ch-orm"><img src="https://img.shields.io/npm/dm/ch-orm.svg" alt="NPM Downloads" /></a>
-  <a href="https://github.com/iarayan/ch-orm/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/ch-orm.svg" alt="License" /></a>
+  <a href="https://www.npmjs.com/package/@iarayan/ch-orm"><img src="https://img.shields.io/npm/v/@iarayan/ch-orm.svg" alt="NPM Version" /></a>
+  <a href="https://www.npmjs.com/package/@iarayan/ch-orm"><img src="https://img.shields.io/npm/dm/@iarayan/ch-orm.svg" alt="NPM Downloads" /></a>
+  <a href="https://github.com/iarayan/ch-orm/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@iarayan/ch-orm.svg" alt="License" /></a>
   <a href="https://github.com/iarayan/ch-orm/actions"><img src="https://github.com/iarayan/ch-orm/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
 </p>
 
