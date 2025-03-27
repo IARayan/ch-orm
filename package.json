@@ -1,6 +1,6 @@
 {
   "name": "ch-orm",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A Developer-First ClickHouse ORM with Powerful CLI Tools",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
