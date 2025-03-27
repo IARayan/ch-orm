@@ -1,5 +1,8 @@
 {
-  "name": "ch-orm",
+  "name": "@iarayan/ch-orm",
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "1.1.0",
   "description": "A Developer-First ClickHouse ORM with Powerful CLI Tools",
   "main": "dist/cjs/index.js",
