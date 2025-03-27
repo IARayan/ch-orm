@@ -13,7 +13,7 @@ export class ModelCommand {
   /**
    * Template for model files
    */
-  private template = `import { Model, Table, Column, PrimaryKey, DateTimeColumn } from 'ch-orm';
+  private template = `import { Model, Table, Column, PrimaryKey, DateTimeColumn } from '@iarayan/ch-orm';
 
 @Table('{tableName}')
 export default class {name} extends Model {

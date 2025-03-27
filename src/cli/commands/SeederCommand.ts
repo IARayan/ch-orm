@@ -58,7 +58,7 @@ export class SeederCommand {
    * Create a new seeder file
    */
   public createSeeder(name: string): string {
-    const template = `import { Seeder } from 'ch-orm';
+    const template = `import { Seeder } from '@iarayan/ch-orm';
 
 export default class ${name}Seeder implements Seeder {
   constructor(private connection: any) {}

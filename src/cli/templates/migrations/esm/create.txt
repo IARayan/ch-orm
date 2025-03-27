@@ -1,4 +1,4 @@
-import { Migration, Blueprint } from 'ch-orm';
+import { Migration, Blueprint } from '@iarayan/ch-orm';
 
 export default class {name} extends Migration {
   /**
