@@ -1,8 +1,22 @@
-# CH-ORM
+<p align="center">
+  <img src="logo.png" alt="CH-ORM Logo" width="250"/>
+</p>
 
-A Developer-First ClickHouse ORM with Powerful CLI Tools
+<h1 align="center">CH-ORM</h1>
+<h3 align="center">A Developer-First ClickHouse ORM with Powerful CLI Tools</h3>
 
-## Features
+<p align="center">
+  <a href="https://www.npmjs.com/package/@iarayan/ch-orm"><img src="https://img.shields.io/npm/v/@iarayan/ch-orm.svg" alt="NPM Version" /></a>
+  <a href="https://www.npmjs.com/package/@iarayan/ch-orm"><img src="https://img.shields.io/npm/dm/@iarayan/ch-orm.svg" alt="NPM Downloads" /></a>
+  <a href="https://github.com/iarayan/ch-orm/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@iarayan/ch-orm.svg" alt="License" /></a>
+  <a href="https://github.com/iarayan/ch-orm/actions"><img src="https://github.com/iarayan/ch-orm/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
+</p>
+
+<p align="center">
+  <b>CH-ORM</b> is an elegant, Eloquent-style ORM for ClickHouse, designed to make working with ClickHouse analytics as simple as working with regular databases.
+</p>
+
+## 🚀 Features
 
 - ✅ **Eloquent-style API** – Intuitive Active Record ORM for ClickHouse
 - ✅ **Built-in CLI** – `chorm migrations`, `chorm models`, `chorm seeders`
@@ -12,18 +26,28 @@ A Developer-First ClickHouse ORM with Powerful CLI Tools
 - ✅ **Connection Pooling** – Efficient connection management
 - ✅ **Query Builder** – Fluent, chainable query interface
 
-## Installation
+## 📦 Installation
 
 ```bash
-npm install ch-orm
+# Using npm
+npm install @iarayan/ch-orm
+
+# Using yarn
+yarn add @iarayan/ch-orm
+
+# Using pnpm
+pnpm add @iarayan/ch-orm
+
+# Global installation (for CLI access from anywhere)
+npm install -g @iarayan/ch-orm
 ```
 
-## Quick Start
+## 🔍 Quick Start
 
 ### Connection Setup
 
 ```typescript
-import { Connection, Model } from "ch-orm";
+import { Connection, Model } from "@iarayan/ch-orm";
 
 // Create a connection
 const connection = new Connection({
@@ -44,7 +68,7 @@ Model.setConnection(connection);
 ### Connection Pool (Recommended for Production)
 
 ```typescript
-import { ConnectionPool, Model } from "ch-orm";
+import { ConnectionPool, Model } from "@iarayan/ch-orm";
 
 // Create a connection pool
 const pool = new ConnectionPool(
@@ -94,7 +118,7 @@ CLICKHOUSE_SEEDERS_PATH=./seeders
 ### Defining Models
 
 ```typescript
-import { Model, Table, Column, PrimaryKey } from "ch-orm";
+import { Model, Table, Column, PrimaryKey } from "@iarayan/ch-orm";
 
 @Table("users")
 class User extends Model {
@@ -165,10 +189,10 @@ const user = await User.create({
 });
 ```
 
-## Migrations
+## 🔄 Migrations
 
 ```typescript
-import { Migration, Blueprint } from "ch-orm";
+import { Migration, Blueprint } from "@iarayan/ch-orm";
 
 export default class CreateUsersTable extends Migration {
   public async up(): Promise<void> {
@@ -227,10 +251,10 @@ export default class AddProfileFieldsToUsers extends Migration {
 }
 ```
 
-## Advanced Query Builder Features
+## 💡 Advanced Query Builder Features
 
 ```typescript
-import { Raw } from "ch-orm";
+import { Raw } from "@iarayan/ch-orm";
 
 // Complex where conditions
 const users = await User.query()
@@ -270,13 +294,13 @@ const result = await User.query()
   .get();
 ```
 
-## Writing Tests
+## 🧪 Writing Tests
 
 ```typescript
-import { Connection, Model } from "ch-orm";
+import { Connection, Model } from "@iarayan/ch-orm";
 
 // Mock the ClickHouse Connection
-jest.mock("ch-orm/lib/connection/Connection");
+jest.mock("@iarayan/ch-orm/lib/connection/Connection");
 
 describe("User", () => {
   let connection: Connection;
@@ -315,6 +339,10 @@ describe("User", () => {
 });
 ```
 
-## License
+## 🤝 Contributing
 
-MIT
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+[MIT](LICENSE)
