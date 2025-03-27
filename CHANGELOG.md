@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/iarayan/ch-orm/compare/v1.0.0...v1.1.0) (2025-03-27)
+
+
+### Features
+
+* initial release ([add2a5d](https://github.com/iarayan/ch-orm/commit/add2a5d7f3836f8f6e1efeeed27a988edf3c3b58))
+
 # 1.0.0 (2025-03-27)
 
 
