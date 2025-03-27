@@ -18,7 +18,7 @@
     "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:types",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
-    "build:types": "tsc -p tsconfig.types.json && tsc-alias -p tsconfig.types.json",
+    "build:types": "tsc -p tsconfig.types.json",
     "prepare": "npm run build",
     "prepublishOnly": "npm test",
     "test": "jest --detectOpenHandles",
@@ -74,7 +74,6 @@
     "semantic-release": "^24.2.3",
     "ts-jest": "^29.3.0",
     "ts-node": "^10.9.2",
-    "tsc-alias": "^1.8.8",
     "typedoc": "^0.28.1",
     "typescript": "^5.8.2"
   }
