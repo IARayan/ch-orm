@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/iarayan/ch-orm/compare/v1.3.1...v1.3.2) (2025-03-27)
+
+
+### Bug Fixes
+
+* update NPM badge links in README.md ([652894f](https://github.com/iarayan/ch-orm/commit/652894f4d4e0c5b5d2e60cef53dd1b1966272a68))
+
 ## [1.3.1](https://github.com/iarayan/ch-orm/compare/v1.3.0...v1.3.1) (2025-03-27)
 
 
