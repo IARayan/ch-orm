@@ -29,20 +29,6 @@ jobs:
       - name: Generate documentation
         run: npm run docs
 
-      # Option 1: Update GitHub Wiki
-      - name: Push to Wiki
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git clone https://${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git wiki
-          cp -r docs/* wiki/
-          cd wiki
-          git add .
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update documentation" && git push)
-
-      # Option 2: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
