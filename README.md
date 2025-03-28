@@ -18,7 +18,7 @@
 
 ## 🚀 Features
 
-- ✅ **Eloquent-style API** – Intuitive Active Record ORM for ClickHouse
+- ✅ **Eloquent-style API** – Intuitive ORM for ClickHouse
 - ✅ **Built-in CLI** – `chorm migrations`, `chorm models`, `chorm seeders`
 - ✅ **Production-Ready** – Optimized for high-performance analytics
 - ✅ **Seamless Migrations** – Schema migrations similar to Laravel/Rails
