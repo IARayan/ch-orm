@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/iarayan/ch-orm/compare/v1.3.4...v1.3.5) (2025-03-27)
+
+
+### Bug Fixes
+
+* update README.md to add badges ([33ede19](https://github.com/iarayan/ch-orm/commit/33ede19cc2c6caa5ad75d40561d3f3a7dec4352e))
+
 ## [1.3.4](https://github.com/iarayan/ch-orm/compare/v1.3.3...v1.3.4) (2025-03-27)
 
 
