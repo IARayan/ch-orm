@@ -1,5 +1,9 @@
+**CH-ORM Documentation v1.3.4**
+
+***
+
 <p align="center">
-  <img src="logo.png" alt="CH-ORM Logo" width="250"/>
+  <img src="_media/logo.png" alt="CH-ORM Logo" width="250"/>
 </p>
 
 <h1 align="center">CH-ORM</h1>
@@ -168,41 +172,17 @@ const result = await connection.query(
 ### Creating Records
 
 ```typescript
-// Create and save in one step
-const user = await User.createAndSave({
-  name: "John Doe",
-  email: "john@example.com",
-});
-
-// Create instance first, then save
-const user = User.create({
-  name: "John Doe",
-  email: "john@example.com",
-});
+// Create instance and save
+const user = new User();
+user.name = "John Doe";
+user.email = "john@example.com";
 await user.save();
 
-// Insert multiple records directly
-await User.insert([
-  { name: "John Doe", email: "john@example.com" },
-  { name: "Jane Smith", email: "jane@example.com" },
-]);
-
-// Insert with query options
-await User.createAndSave(
-  {
-    name: "John Doe",
-    email: "john@example.com",
-  },
-  {
-    format: "JSON",
-    timeout_seconds: 30,
-    max_rows_to_read: 1000,
-    clickhouse_settings: {
-      max_block_size: 100000,
-      min_insert_block_size_rows: 1000,
-    },
-  }
-);
+// Create directly
+const user = await User.create({
+  name: "John Doe",
+  email: "john@example.com",
+});
 ```
 
 ## 🔄 Migrations
@@ -338,4 +318,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📝 License
 
-[MIT](LICENSE)
+[MIT](_media/LICENSE)

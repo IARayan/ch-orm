@@ -1,0 +1,32 @@
+{
+  "entryPoints": ["src"],
+  "out": "docs",
+  "plugin": ["typedoc-plugin-markdown"],
+  "exclude": ["**/*.test.ts", "**/*.spec.ts"],
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "hideBreadcrumbs": false,
+  "hidePageTitle": false,
+  "includeVersion": true,
+  "sort": ["source-order"],
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "*",
+    "Connection",
+    "Query",
+    "Schema",
+    "Migration",
+    "Model",
+    "Utils"
+  ],
+  "readme": "README.md",
+  "name": "CH-ORM Documentation",
+  "excludeInternal": true,
+  "disableSources": false,
+  "sourceLinkTemplate": "https://github.com/iarayan/ch-orm/blob/main/{path}#L{line}",
+  "gitRevision": "main",
+  "fileExtension": ".md",
+  "hideGenerator": false,
+  "inlineTags": true,
+  "sanitizeComments": true
+}

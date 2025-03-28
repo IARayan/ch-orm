@@ -28,7 +28,10 @@
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "lint": "eslint . --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "docs": "typedoc",
+    "docs:watch": "typedoc --watch",
+    "docs:sync": "./scripts/sync-wiki.sh"
   },
   "keywords": [
     "clickhouse",
@@ -78,6 +81,7 @@
     "ts-jest": "^29.3.0",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.1",
+    "typedoc-plugin-markdown": "^4.6.0",
     "typescript": "^5.8.2"
   }
 }
