@@ -1,0 +1,27 @@
+[**CH-ORM Documentation v1.3.5**](../README.md)
+
+***
+
+[CH-ORM Documentation](../globals.md) / StringColumn
+
+# Function: StringColumn()
+
+> **StringColumn**(`options`): `PropertyDecorator`
+
+Defined in: [decorators/ModelDecorators.ts:258](https://github.com/iarayan/ch-orm/blob/main/src/decorators/ModelDecorators.ts#L258)
+
+String column decorator
+
+## Parameters
+
+### options
+
+`Partial`\<`Omit`\<[`ColumnOptions`](../interfaces/ColumnOptions.md), `"type"`\>\> = `{}`
+
+Column options (optional)
+
+## Returns
+
+`PropertyDecorator`
+
+Property decorator
